@@ -1,50 +1,133 @@
 const TelegramBot = require('node-telegram-bot-api');
 
-const token = '8983444821:AAFiqXNfZmotL_2zKzWYIEz0lw9whBiVe4c';
-const adminId = 8548576912; // ID Telegram của bạn
+const token = process.env.8983444821:AAFiqXNfZmotL_2zKzWYIEz0lw9whBiVe4c;
+const adminId = Number(process.env.8548576912);
 
 const bot = new TelegramBot(token, { polling: true });
 
-// User nhắn bot
+// Lưu mapping giữa message admin nhận và user gửi
+const messageMap = new Map();
+
+// =======================
+// USER -> ADMIN
+// =======================
+
 bot.on('message', async (msg) => {
     const chatId = msg.chat.id;
 
-    // Không forward tin của admin
-    if (chatId == adminId) return;
+    // Bỏ qua tin nhắn admin (xử lý riêng bên dưới)
+    if (chatId === adminId) return;
 
-    // Gửi tin nhắn user cho admin
-    bot.sendMessage(adminId,
-        `📩 Tin nhắn mới\n\n👤 ID: ${chatId}\n💬 ${msg.text}`
-    );
+    try {
+        let sentMessage;
 
-    // Reply tự động
-    bot.sendMessage(chatId,
-        '✅ Tin nhắn của bạn đã được gửi tới admin.'
-    );
+        if (msg.text) {
+            sentMessage = await bot.sendMessage(
+                adminId,
+                `📩 Tin nhắn mới\n\n👤 User ID: ${chatId}\n\n${msg.text}`
+            );
+        }
+
+        else if (msg.photo) {
+            const photo = msg.photo[msg.photo.length - 1].file_id;
+
+            sentMessage = await bot.sendPhoto(
+                adminId,
+                photo,
+                {
+                    caption: `👤 User ID: ${chatId}\n\n${msg.caption || ''}`
+                }
+            );
+        }
+
+        else if (msg.video) {
+            sentMessage = await bot.sendVideo(
+                adminId,
+                msg.video.file_id,
+                {
+                    caption: `👤 User ID: ${chatId}\n\n${msg.caption || ''}`
+                }
+            );
+        }
+
+        else if (msg.document) {
+            sentMessage = await bot.sendDocument(
+                adminId,
+                msg.document.file_id,
+                {
+                    caption: `👤 User ID: ${chatId}\n\n${msg.caption || ''}`
+                }
+            );
+        }
+
+        if (sentMessage) {
+            messageMap.set(sentMessage.message_id, chatId);
+        }
+
+    } catch (err) {
+        console.error(err);
+    }
 });
 
-// Admin trả lời
+// =======================
+// ADMIN REPLY -> USER
+// =======================
+
 bot.on('message', async (msg) => {
-    const chatId = msg.chat.id;
 
-    // Chỉ admin mới dùng
-    if (chatId != adminId) return;
+    if (msg.chat.id !== adminId) return;
 
-    // Format:
-    // /reply ID nội_dung
+    if (!msg.reply_to_message) return;
 
-    if (msg.text.startsWith('/reply')) {
-        const args = msg.text.split(' ');
+    const originalMessageId = msg.reply_to_message.message_id;
 
-        const userId = args[1];
-        const text = args.slice(2).join(' ');
+    const userId = messageMap.get(originalMessageId);
 
-        bot.sendMessage(userId,
-            `📨 Admin:\n${text}`
-        );
+    if (!userId) return;
 
-        bot.sendMessage(adminId,
-            '✅ Đã gửi.'
-        );
+    try {
+
+        // Text
+        if (msg.text) {
+            await bot.sendMessage(userId, msg.text);
+        }
+
+        // Ảnh
+        else if (msg.photo) {
+            const photo = msg.photo[msg.photo.length - 1].file_id;
+
+            await bot.sendPhoto(
+                userId,
+                photo,
+                {
+                    caption: msg.caption || ''
+                }
+            );
+        }
+
+        // Video
+        else if (msg.video) {
+            await bot.sendVideo(
+                userId,
+                msg.video.file_id,
+                {
+                    caption: msg.caption || ''
+                }
+            );
+        }
+
+        // File
+        else if (msg.document) {
+            await bot.sendDocument(
+                userId,
+                msg.document.file_id,
+                {
+                    caption: msg.caption || ''
+                }
+            );
+        }
+
+    } catch (err) {
+        console.error(err);
     }
 });
