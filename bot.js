@@ -1,13 +1,14 @@
 const TelegramBot = require('node-telegram-bot-api');
 
 // =========================
-// THAY THÔNG TIN Ở ĐÂY
+// CẤU HÌNH
 // =========================
-const token = '8983444821:AAEHEkgxK175mufHOvnit0UzjDlbcYTd_d4';
+
+const token = '8983444821:AAGTT2MbGRESht8zbe9vks6aHVHocX78qCo';
 const adminId = 8548576912;
-// Ví dụ:
-// const token = '1234567890:AAxxxxxxxxxxxxxxxxxxxx';
-// const adminId = 8548576912;
+const startPhoto = 'https://i.imgur.com/Ktckzxs.jpeg';
+const channelUrl = 'https://t.me/+Y0TODq6QhU84NDll';
+
 // =========================
 
 const bot = new TelegramBot(token, {
@@ -19,14 +20,64 @@ const messageMap = new Map();
 console.log('Bot đang hoạt động...');
 
 // =========================
-// USER -> ADMIN
+// START
 // =========================
+
+bot.onText(//start/, async (msg) => {
+
+const name = msg.from.first_name || 'Bạn';
+
+try {
+
+    await bot.sendPhoto(
+        msg.chat.id,
+        startPhoto,
+        {
+            caption: `👋 Xin chào ${name}!
+
+✨ Chào mừng đến với Bot Support
+
+📩 Hãy gửi tin nhắn, ảnh, video, sticker hoặc file để liên hệ admin.
+
+⏰ Admin sẽ phản hồi sớm nhất có thể.
+
+🔥 Cảm ơn bạn đã sử dụng bot!`,
+reply_markup: {
+inline_keyboard: [
+[
+{
+text: '📢 Kênh Telegram',
+url: channelUrl
+}
+]
+]
+}
+}
+);
+
+} catch {
+
+    await bot.sendMessage(
+        msg.chat.id,
+        `👋 Xin chào ${name}!
+
+✨ Chào mừng đến với Bot Support
+
+📩 Hãy gửi tin nhắn để liên hệ admin.`
+);
+
+}
+
+});
+
+// USER -> ADMIN
 
 bot.on('message', async (msg) => {
 
 const chatId = msg.chat.id;
 
 if (chatId === adminId) return;
+if (msg.text === '/start') return;
 
 try {
 
@@ -45,100 +96,23 @@ try {
 
     }
 
-    else if (msg.photo) {
-
-        const photo =
-            msg.photo[msg.photo.length - 1].file_id;
-
-        sentMessage = await bot.sendPhoto(
-            adminId,
-            photo,
-            {
-                caption: `📷 Ảnh mới
-
-👤 User ID: ${chatId}
-
-${msg.caption || ''}`
-}
-);
-
-    }
-
-    else if (msg.video) {
-
-        sentMessage = await bot.sendVideo(
-            adminId,
-            msg.video.file_id,
-            {
-                caption: `🎥 Video mới
-
-👤 User ID: ${chatId}
-
-${msg.caption || ''}`
-}
-);
-
-    }
-
-    else if (msg.document) {
-
-        sentMessage = await bot.sendDocument(
-            adminId,
-            msg.document.file_id,
-            {
-                caption: `📁 File mới
-
-👤 User ID: ${chatId}
-
-${msg.caption || ''}`
-}
-);
-
-    }
-
-    else if (msg.sticker) {
-
-        sentMessage = await bot.sendSticker(
-            adminId,
-            msg.sticker.file_id
-        );
-
-    }
-
-    else if (msg.voice) {
-
-        sentMessage = await bot.sendVoice(
-            adminId,
-            msg.voice.file_id
-        );
-
-    }
-
     if (sentMessage) {
-
-        messageMap.set(
-            sentMessage.message_id,
-            chatId
-        );
-
+        messageMap.set(sentMessage.message_id, chatId);
     }
 
-} catch (error) {
+} catch (err) {
 
-    console.error(error);
+    console.error(err);
 
 }
 
 });
 
-// =========================
-// ADMIN REPLY -> USER
-// =========================
+// ADMIN REPLY
 
 bot.on('message', async (msg) => {
 
 if (msg.chat.id !== adminId) return;
-
 if (!msg.reply_to_message) return;
 
 const userId = messageMap.get(
@@ -149,75 +123,16 @@ if (!userId) return;
 
 try {
 
-    if (msg.text) {
+    await bot.sendMessage(
+        userId,
+        `📩 Admin:
 
-        await bot.sendMessage(
-            userId,
-            msg.text
-        );
+${msg.text}`
+);
 
-    }
+} catch (err) {
 
-    else if (msg.photo) {
-
-        const photo =
-            msg.photo[msg.photo.length - 1].file_id;
-
-        await bot.sendPhoto(
-            userId,
-            photo,
-            {
-                caption: msg.caption || ''
-            }
-        );
-
-    }
-
-    else if (msg.video) {
-
-        await bot.sendVideo(
-            userId,
-            msg.video.file_id,
-            {
-                caption: msg.caption || ''
-            }
-        );
-
-    }
-
-    else if (msg.document) {
-
-        await bot.sendDocument(
-            userId,
-            msg.document.file_id,
-            {
-                caption: msg.caption || ''
-            }
-        );
-
-    }
-
-    else if (msg.sticker) {
-
-        await bot.sendSticker(
-            userId,
-            msg.sticker.file_id
-        );
-
-    }
-
-    else if (msg.voice) {
-
-        await bot.sendVoice(
-            userId,
-            msg.voice.file_id
-        );
-
-    }
-
-} catch (error) {
-
-    console.error(error);
+    console.error(err);
 
 }
 
