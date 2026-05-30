@@ -3,7 +3,7 @@ const TelegramBot = require('node-telegram-bot-api');
 // =========================
 // THAY THÔNG TIN Ở ĐÂY
 // =========================
-const token = '8983444821:AAEHEkgxK175mufHOvnit0UzjDlbcYTd_d4';
+const token = '8983444821:AAGTT2MbGRESht8zbe9vks6aHVHocX78qCo';
 const adminId = 8548576912;
 // Ví dụ:
 // const token = '1234567890:AAxxxxxxxxxxxxxxxxxxxx';
