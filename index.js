@@ -23,7 +23,7 @@ bot.onText(/\/start/, async (msg) => {
             {
                 caption: `👋 Xin chào ${name}!
 
-🤖 Chào mừng bạn đến với bot.
+Tham gia nhóm để nhận khuyến mãi nha.
 
 📌 Nhấn nút bên dưới để tiếp tục.`,
                 reply_markup: {
@@ -31,7 +31,7 @@ bot.onText(/\/start/, async (msg) => {
                         [
                             {
                                 text: '📢 Kênh Telegram',
-                                url: 'https://t.me/tenkenh'
+                                url: 'https://t.me/+4Hunr3sn67M3ZDM1'
                             }
                         ]
                     ]
