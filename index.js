@@ -1,7 +1,7 @@
 const TelegramBot = require('node-telegram-bot-api');
 
 // ===== TOKEN BOT =====
-const token = '8873280492:AAEyt6Ff03Q_fbv0sg9KyQWv5GrGBfnv0Qk';
+const token = '8873280492:AAHzAjd34XghpbGck0sIrsaGHCWYcDdCabQ';
 
 // =====================
 
