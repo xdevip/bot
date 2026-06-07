@@ -19,7 +19,7 @@ bot.onText(/\/start/, async (msg) => {
     try {
         await bot.sendVideo(
             chatId,
-            'https://example.com/video.mp4', // Thay bằng link video của bạn
+            'https://www.image2url.com/r2/default/videos/1780843370785-6fae0758-ea7e-4b82-8cb6-0cb4be9be971.mp4', // Thay bằng link video của bạn
             {
                 caption: `👋 Xin chào ${name}!
 
